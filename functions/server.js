@@ -1,15 +1,16 @@
 
 const express = require("express");
+const serverless = require("serverless-http");
+
 const bodyparser = require("body-parser");
-const customerRoutes = require("./routes/customerRoutes");
-const userRoutes = require("./routes/userRoutes");
-const ticketRoutes = require("./routes/ticketRoutes");
+const customerRoutes = require("../routes/customerRoutes");
+const userRoutes = require("../routes/userRoutes");
+const ticketRoutes = require("../routes/ticketRoutes");
 const server = express();
 const cors = require("cors");
-const mongodb = require("./config/mongodb");
 
-server.listen(4000);
-mongodb.connect();
+// server.listen(4000);
+
 server.use(bodyparser.json());
 server.use((req, res, next)=>{
     // Website you wish to allow to connect
@@ -30,13 +31,17 @@ server.use((req, res, next)=>{
 });
 
 server.use(cors());
+const router = express.Router();
 
-server.use("/api/customer",customerRoutes.router);
-server.use("/api/user",userRoutes.router);
-server.use("/api/ticket",ticketRoutes.router);
+router.use("/api/customer",customerRoutes.router);
+router.use("/api/user",userRoutes.router);
+router.use("/api/ticket",ticketRoutes.router);
 
-server.get("/", (req, res)=>{
+router.get("/", (req, res)=>{
     res.send("Welcome to CRM API");
 });
 
+server.use("/", router);
 console.log("Server is listening on 4000");
+
+module.exports.handler = serverless(server);
